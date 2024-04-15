@@ -1,11 +1,12 @@
-import os, glob
+import os
+import glob
 from lxml import etree
 import re
 import pandas as pd
 import calendar
 import locale
 from datetime import date
-from dateutil.relativedelta import relativedelta 
+from dateutil.relativedelta import relativedelta
 from datetime import datetime
 
 # date settings
