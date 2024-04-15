@@ -37,11 +37,14 @@ def get_list_of_data(root):
     data = []
     for el in elements:
         counter_number = el.find(
-        './/ss:Cell[@ss:DataType="DHeader_FactoryNumberVal"]/ss:Data', ns).text
+         './/ss:Cell[@ss:DataType="DHeader_FactoryNumberVal"]/ss:Data',
+         ns).text
         type_of_datasheet = el.find(
-        './/ss:Cell[@ss:DataType="DHeader_DataTypeVal"]/ss:Data', ns).text
+         './/ss:Cell[@ss:DataType="DHeader_DataTypeVal"]/ss:Data',
+         ns).text
         data_rows = el.findall(
-        './/ss:Row[@ss:TableType="DataMeasTable"][@ss:Session="0"]', ns)
+         './/ss:Row[@ss:TableType="DataMeasTable"][@ss:Session="0"]',
+         ns)
         if type_of_datasheet in types_of_data:
             print(el.attrib[
                 '{urn:schemas-microsoft-com:office:spreadsheet}Name'],
@@ -64,7 +67,7 @@ def get_list_of_data(root):
                 kw_int_list.append(round(float(kw.replace(',', '.')), 4))
                 summary_of_KW.append(round(sum(kw_int_list), 4))
             # print(round(sum(kw_int_list), 4))
-            # print(list_of_counters)      
+            # print(list_of_counters)
         # print(summary_of_KW)
         for i in range(len(list_of_counters)):
             summarize_of_profiles[list_of_counters[i]] = summary_of_KW[i],

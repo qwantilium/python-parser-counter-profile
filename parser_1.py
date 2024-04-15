@@ -46,7 +46,7 @@ def delete_worksheets(root):
 
 def separate_for_companies(root, copy_root):
     for company, counter_numbers in all_lists.items():
-        empty_root = copy.deepcopy(root)    
+        empty_root = copy.deepcopy(root)
         for el in copy_root.findall('ss:Worksheet', ns):
             counter_number = el.find(
                 './/ss:Cell[@ss:DataType="DHeader_FactoryNumberVal"]/ss:Data',
