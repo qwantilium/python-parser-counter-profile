@@ -65,18 +65,20 @@ def get_list_of_data(root):
             for kw in kw_list[1:]:
                 kw.replace(',', '.')
                 kw_int_list.append(round(float(kw.replace(',', '.')), 4))
-                summary_of_KW.append(round(sum(kw_int_list), 4))
+                # print(kw_int_list)
+            summary_of_KW.append(round(sum(kw_int_list), 4))
             # print(round(sum(kw_int_list), 4))
-            # print(list_of_counters)
+        # print(list_of_counters)
         # print(summary_of_KW)
         for i in range(len(list_of_counters)):
-            summarize_of_profiles[list_of_counters[i]] = summary_of_KW[i],
-            kilowatt_values[i]
-
+            summarize_of_profiles[
+                list_of_counters[i]] = summary_of_KW[i], kilowatt_values[i]
+    # print(summarize_of_profiles)
     for key, value in summarize_of_profiles.items():
         data.append({'Счетчик': key,
                      'Сумма кВт профиля': value[0],
                      'показания': value[1]})
+    # print(data)
     return data
 
 
@@ -86,6 +88,9 @@ def collect_to_excel(data):
                           f"{calendar.month_name[previous_month.month]} "
                           f"{datetime.now().year}.xlsx", index=False
                           )
+    print(f'Файл "Показания Энергомера '
+          f'{calendar.month_name[previous_month.month]} '
+          f'{datetime.now().year}.xlsx записан"')
 
 
 if __name__ == '__main__':
