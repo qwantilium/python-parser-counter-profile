@@ -56,9 +56,14 @@ def separate_for_companies(root, copy_root):
                 if number == counter_number:
                     empty_root.append(el)
                     new_tree = ET.ElementTree(empty_root)
+                    # new_tree.write(
+                    #     f'{company} '
+                    #     f'{calendar.month_name[previous_month.month]} '
+                    #     f'{datetime.now().year}.xml',
+                    #     xml_declaration=True, encoding="utf-8")
                     new_tree.write(
                         f'{company} '
-                        f'{calendar.month_name[previous_month.month]} '
+                        f'24.04 и 05.05 '
                         f'{datetime.now().year}.xml',
                         xml_declaration=True, encoding="utf-8")
                     print(f'{counter_number} записан в {company}')
@@ -67,7 +72,7 @@ def separate_for_companies(root, copy_root):
 
 
 if __name__ == '__main__':
-    root = pars_of_xml('март 2024.xml')
+    root = pars_of_xml('24 и 5 числа (2).xml')
     copy_root = copy.deepcopy(root)
     delete_worksheets(root)
     separate_for_companies(root, copy_root)
