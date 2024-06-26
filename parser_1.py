@@ -22,7 +22,9 @@ all_lists = {'ТП 70': ['011793167151409',
                           '012289174709791',
                           ],
              'Пластмасса Пермь': ['012289174709928'],
-             'Соловьев': ['009112172244601']}
+             'Соловьев': ['009112172244601'],
+             'Храмушина': ['012289198809411'],
+             'Туева': ['012643188307856']}
 
 # Namespaces lists
 ns = {'_': 'urn:schemas-microsoft-com:office:spreadsheet',
@@ -56,23 +58,23 @@ def separate_for_companies(root, copy_root):
                 if number == counter_number:
                     empty_root.append(el)
                     new_tree = ET.ElementTree(empty_root)
-                    # new_tree.write(
-                    #     f'{company} '
-                    #     f'{calendar.month_name[previous_month.month]} '
-                    #     f'{datetime.now().year}.xml',
-                    #     xml_declaration=True, encoding="utf-8")
                     new_tree.write(
                         f'{company} '
-                        f'24.04 и 05.05 '
+                        f'{calendar.month_name[previous_month.month]} '
                         f'{datetime.now().year}.xml',
                         xml_declaration=True, encoding="utf-8")
-                    print(f'{counter_number} записан в {company}')
+                    # new_tree.write(
+                    #     f'{company} '
+                    #     f'24.04 и 05.05 '
+                    #     f'{datetime.now().year}.xml',
+                    #     xml_declaration=True, encoding="utf-8")
+                    # print(f'{counter_number} записан в {company}')
                 else:
                     print('счетчик не в спике')
 
 
 if __name__ == '__main__':
-    root = pars_of_xml('24 и 5 числа (2).xml')
+    root = pars_of_xml('май 2024(no doubles).xml')
     copy_root = copy.deepcopy(root)
     delete_worksheets(root)
     separate_for_companies(root, copy_root)

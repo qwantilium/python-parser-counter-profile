@@ -10,6 +10,7 @@ import pandas as pd
 previous_month = date.today() + relativedelta(months=-1)
 locale.setlocale(locale.LC_TIME, 'ru_RU')
 
+
 # lists of data for comparing and namespaces
 types_of_data = ['Энергии на конец месяца', 'Месячные накопления энергии']
 ns = {'_': 'urn:schemas-microsoft-com:office:spreadsheet',
@@ -22,87 +23,97 @@ ns = {'_': 'urn:schemas-microsoft-com:office:spreadsheet',
 
 # tree = ET.parse('март 2024.xml')
 # root = tree.getroot()
-def pars_of_xml(name_of_file):
+def pars_of_xml_get_elements(name_of_file):
     tree = ET.parse(name_of_file)
     root = tree.getroot()
     return root
 
 
-def get_kilowatt_value(el, data_rows, counter_number, type_of_datasheet,
-                       kilowatt_values):
-    print(el.attrib['{urn:schemas-microsoft-com:office:spreadsheet}Name'],
-          counter_number, type_of_datasheet)
-    for row in data_rows[1:]:
-        kilowatt_value = row.find(
-            './/ss:Cell[@ss:DataType="DMValue"]/ss:Data', ns).text
-        kilowatt_values.append(kilowatt_value)
-        print(kilowatt_value)
+# def get_kilowatt_value(el, data_rows, counter_number, type_of_datasheet,
+#                        kilowatt_values):
+#     print(el.attrib['{urn:schemas-microsoft-com:office:spreadsheet}Name'],
+#           counter_number, type_of_datasheet)
+#     for row in data_rows[1:]:
+#         kilowatt_value = row.find(
+#             './/ss:Cell[@ss:DataType="DMValue"]/ss:Data', ns).text
+#         kilowatt_values.append(kilowatt_value)
+#     print(kilowatt_values, 'список кВт')
+#     return kilowatt_values
 
 
-def get_list_of_data(root):
+def get_list_of_counters(root):
+    counters = {}
+    list_counters = []
     elements = root.findall('ss:Worksheet', ns)
-    list_of_counters = []
-    summarize_of_profiles = {}
-    summary_of_KW = []
     kilowatt_values = []
-    data = []
+    dates = []
     for el in elements:
-        counter_number = el.find(
-         './/ss:Cell[@ss:DataType="DHeader_FactoryNumberVal"]/ss:Data',
-         ns).text
+        # print(el)    
         type_of_datasheet = el.find(
          './/ss:Cell[@ss:DataType="DHeader_DataTypeVal"]/ss:Data',
          ns).text
-        data_rows = el.findall(
-         './/ss:Row[@ss:TableType="DataMeasTable"][@ss:Session="0"]',
-         ns)
+        # print(type_of_datasheet)
         if type_of_datasheet in types_of_data:
-            get_kilowatt_value(el, data_rows, counter_number,
-                               type_of_datasheet, kilowatt_values)
-        else:
-            list_of_counters.append(counter_number)
-            kw_list = []
-            kw_int_list = []
+            values = {}
+            counter_number = el.find(
+             './/ss:Cell[@ss:DataType="DHeader_FactoryNumberVal"]/ss:Data',
+             ns).text
+            data_rows = el.findall(
+             './/ss:Row[@ss:TableType="DataMeasTable"][@ss:Session="0"]',
+             ns)
+            # print(counter_number)
+            # append counter number to the list
+            list_counters.append(counter_number)
+            # parse date and kilowatt value
             for row in data_rows[1:]:
-                kilowatt_value_2 = row.find(
-                    './/ss:Cell[@ss:DataType="DMValue"]/ss:Data', ns).text
-                kw_list.append(kilowatt_value_2)
-                # print(kw_list)
-            for kw in kw_list:
-                if kw == '--------':
-                    kw.replace('--------', '0.0000')
-                else:
-                    kw.replace(',', '.')
-            # print(kw_list)
-                    kw_int_list.append(round(float(kw.replace(',', '.')), 4))
-                # print(kw_int_list)
-            summary_of_KW.append(round(sum(kw_int_list), 4))
-            # print(round(sum(kw_int_list), 4))
-        # print(list_of_counters)
-        # print(summary_of_KW)
-        for i in range(len(list_of_counters)):
-            summarize_of_profiles[list_of_counters[i]] = (summary_of_KW[i],
-                                                          kilowatt_values[i])
-    for key, value in summarize_of_profiles.items():
-        data.append({'Счетчик': key,
-                     'Сумма кВт профиля': value[0],
-                     'показания': value[1]})
-    return data
-    # print (list_of_counters)
+                kilowatt_value = row.find(
+                                          './/ss:Cell[@ss:DataType="DMValue"]/ss:Data', ns).text
+                date = row.find('.//ss:Cell[@ss:DataType="DMDate"]/ss:Data', ns).text
+                dates.append(date)
+                kilowatt_values.append(round(float(kilowatt_value.replace(',', '.')), 4))
+                kilowatt_value = round(float(kilowatt_value.replace(',', '.')), 4)
+                values[date] = kilowatt_value
+                counters[counter_number] = values
+    # print(counters)
+    # print(len(list_counters), len(dates), len(kilowatt_values))
+    # print(dates)
+    # print(kilowatt_values)
+    return counters
+    # print(counters)
+    # return counters
 
 
-def collect_to_excel(data):
-    get_to_excel = pd.DataFrame(data)
-    get_to_excel.to_excel(f"Показания Энергомера "
-                          f"{calendar.month_name[previous_month.month]} "
-                          f"{datetime.now().year}.xlsx", index=False
-                          )
-    print(f'Файл "Показания Энергомера '
-          f'{calendar.month_name[previous_month.month]} '
-          f'{datetime.now().year}.xlsx записан"')
+def collect_to_excel(counters):
+    name_file = (f"Показания Энергомера "
+                 f"{calendar.month_name[previous_month.month]} "
+                 f"{datetime.now().year}.xlsx")
+    # sorting dates
+    all_dates = set()
+    for dates_values in counters.values():
+        all_dates.update(dates_values.keys())
+    all_dates = sorted(all_dates)
+    print(all_dates)
+    # create a data frame
+    df = pd.DataFrame(index=counters.keys(), columns=all_dates)
+    for counter, dates_values in counters.items():
+        for date_of_value, kilowatt_value in dates_values.items():
+            df.at[counter, date_of_value] = kilowatt_value
+    df.index.name = 'Счетчики'
+    writer = pd.ExcelWriter(name_file, engine='xlsxwriter')
+    # write the data frame to Excel
+    df.to_excel(writer, sheet_name='Лист1')
+    # get the XlsxWriter workbook and worksheet objects
+    # workbook = writer.book
+    worksheet = writer.sheets['Лист1']
+    worksheet.autofit()
+    # save the Excel file
+    writer.close()
+
+    print(f'Файл {name_file} записан"')
+    print(df)
 
 
 if __name__ == '__main__':
-    root = pars_of_xml('апрель 2024.xml')
-    data = get_list_of_data(root)
-    collect_to_excel(data)
+    root = pars_of_xml_get_elements('май 2024.xml')
+    data2 = get_list_of_counters(root)
+    collect_to_excel(data2)
